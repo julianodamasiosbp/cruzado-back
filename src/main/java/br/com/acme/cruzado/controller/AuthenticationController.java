@@ -1,8 +1,9 @@
 package br.com.acme.cruzado.controller;
 
 import br.com.acme.cruzado.config.JwtUtils;
-import br.com.acme.cruzado.dao.UserDao;
 import br.com.acme.cruzado.domain.dto.AuthenticationRequest;
+import br.com.acme.cruzado.domain.model.User;
+import br.com.acme.cruzado.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,12 +21,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthenticationController {
 
     private final AuthenticationManager authenticationManager;
-    private final UserDao userDao;
+    private final UserRepository userRepository;
     private final JwtUtils jwtUtils;
 
-    public AuthenticationController(AuthenticationManager authenticationManager, UserDao userDao, JwtUtils jwtUtils) {
+    public AuthenticationController(AuthenticationManager authenticationManager, UserRepository userRepository, JwtUtils jwtUtils) {
         this.authenticationManager = authenticationManager;
-        this.userDao = userDao;
+        this.userRepository = userRepository;
         this.jwtUtils = jwtUtils;
     }
 
@@ -34,7 +35,7 @@ public class AuthenticationController {
         authenticationManager
                 .authenticate(
                         new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
-        final UserDetails user = userDao.findUserByEmail(request.getEmail());
+        final User user = userRepository.findUserByEmail(request.getEmail());
         if(user != null){
             return ResponseEntity.ok(jwtUtils.generateToken(user));
         }

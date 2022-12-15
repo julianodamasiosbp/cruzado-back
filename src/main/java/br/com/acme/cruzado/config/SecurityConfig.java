@@ -1,6 +1,6 @@
 package br.com.acme.cruzado.config;
 
-import br.com.acme.cruzado.dao.UserDao;
+import br.com.acme.cruzado.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,11 +23,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
-    private final UserDao userDao;
+    private final UserRepository userRepository;
 
-    public SecurityConfig(JwtAuthFilter jwtAuthFilter, UserDao userDao) {
+    public SecurityConfig(JwtAuthFilter jwtAuthFilter, UserRepository userRepository) {
         this.jwtAuthFilter = jwtAuthFilter;
-        this.userDao = userDao;
+        this.userRepository = userRepository;
     }
 
     @Bean
@@ -37,7 +37,7 @@ public class SecurityConfig {
                 .authorizeRequests()
                 .antMatchers("/**/auth/**")
                 .permitAll()
-                .antMatchers("/**/user/**")
+                .antMatchers("/**/signup/**")
                 .permitAll()
                 .anyRequest()
                 .authenticated()
@@ -75,7 +75,7 @@ public class SecurityConfig {
         return new UserDetailsService() {
             @Override
             public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-                return userDao.findUserByEmail(email);
+                return userRepository.findUserByEmail(email);
             }
         };
     }

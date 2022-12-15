@@ -1,6 +1,7 @@
 package br.com.acme.cruzado.config;
 
-import br.com.acme.cruzado.dao.UserDao;
+import br.com.acme.cruzado.domain.model.User;
+import br.com.acme.cruzado.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,8 +22,13 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
 
-    private UserDao userDao;
+    private UserRepository userRepository;
     private JwtUtils jwtUtils;
+
+    public JwtAuthFilter(UserRepository userRepository, JwtUtils jwtUtils) {
+        this.userRepository = userRepository;
+        this.jwtUtils = jwtUtils;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -40,11 +46,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         jwtToken = authHeader.substring(7);
         userEmail = jwtUtils.extractUsername(jwtToken);
         if(userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDao.findUserByEmail(userEmail);
+            User savedUser = userRepository.findUserByEmail(userEmail);
 
-            if(jwtUtils.validateToken(jwtToken, userDetails)){
+            if(jwtUtils.validateToken(jwtToken, savedUser)){
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
+                        savedUser, null, savedUser.getAuthorities());
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }

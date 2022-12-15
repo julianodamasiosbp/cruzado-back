@@ -15,12 +15,12 @@ import java.net.URI;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/user")
-public class UserController {
+@RequestMapping("/api/v1/signup")
+public class SignUpController {
 
     private final UserService userService;
 
-    public UserController(UserService userService) {
+    public SignUpController(UserService userService) {
         this.userService = userService;
     }
 
